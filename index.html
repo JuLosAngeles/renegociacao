@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AP PONTO — Simulador de Renegociação Pro Soluto</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  :root{
+    --brand:#1a4f8a;
+    --brand-light:#e8f0fa;
+    --brand-dark:#0f3060;
+    --red:#D94F3D;
+    --green:#1D9E75;
+    --green-bg:#e8f7f2;
+    --amber:#BA7517;
+    --amber-bg:#fef3dc;
+    --gray:#5F5E5A;
+    --gray-light:#f5f4f1;
+    --border:#e0ddd5;
+    --text:#1a1a18;
+    --text-sec:#6b6a65;
+    --white:#ffffff;
+    --danger-bg:#fdf0ee;
+    --radius:8px;
+    --radius-lg:12px;
+  }
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    background:#f2f1ee;
+    color:var(--text);
+    font-size:14px;
+    line-height:1.5;
+    min-height:100vh;
+  }
+
+  /* HEADER */
+  header{
+    background:var(--white);
+    border-bottom:1px solid var(--border);
+    padding:0 32px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    height:64px;
+    position:sticky;top:0;z-index:100;
+  }
+  .logo{display:flex;align-items:center;gap:2px;}
+  .logo-ap{font-size:24px;font-weight:800;color:var(--brand);letter-spacing:-0.5px;}
+  .logo-space{width:6px;}
+  .logo-p{font-size:24px;font-weight:800;color:var(--brand);letter-spacing:-0.5px;}
+  .logo-house{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:22px;height:22px;
+    background:var(--red);
+    border-radius:4px;
+    margin:0 1px;
+    position:relative;top:-1px;
+  }
+  .logo-house svg{width:13px;height:13px;}
+  .logo-nto{font-size:24px;font-weight:800;color:var(--brand);letter-spacing:-0.5px;}
+  .header-badge{
+    font-size:11px;font-weight:500;
+    background:var(--brand-light);color:var(--brand);
+    padding:4px 12px;border-radius:20px;
+    border:1px solid #c5d9f0;
+  }
+
+  /* MAIN */
+  main{max-width:1100px;margin:0 auto;padding:28px 24px 48px;}
+
+  /* INDEXADORES */
+  .idx-bar{
+    background:var(--white);border:1px solid var(--border);
+    border-radius:var(--radius);padding:10px 16px;
+    font-size:11px;color:var(--text-sec);
+    display:flex;align-items:center;gap:6px;flex-wrap:wrap;
+    margin-bottom:20px;
+  }
+  .idx-bar strong{color:var(--text);}
+  .idx-dot{color:var(--border);font-size:14px;}
+  .idx-tag{
+    background:var(--brand-light);color:var(--brand);
+    font-size:10px;font-weight:600;padding:2px 7px;
+    border-radius:20px;margin-left:4px;
+  }
+
+  /* GRID */
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;}
+  @media(max-width:720px){.grid2{grid-template-columns:1fr;}}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+  @media(max-width:600px){.grid3{grid-template-columns:1fr;}}
+  .grid22{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+  @media(max-width:500px){.grid22{grid-template-columns:1fr;}}
+
+  /* PANELS */
+  .panel{
+    background:var(--white);border:1px solid var(--border);
+    border-radius:var(--radius-lg);padding:20px;
+  }
+  .sec{
+    font-size:10px;font-weight:600;color:var(--text-sec);
+    text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px;
+  }
+
+  /* FORM ELEMENTS */
+  label.lbl{font-size:12px;color:var(--text-sec);display:block;margin-bottom:4px;}
+  input[type=number], select{
+    padding:7px 10px;
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    background:var(--white);
+    color:var(--text);
+    font-size:13px;
+    width:100%;
+    outline:none;
+    transition:border-color .15s;
+  }
+  input[type=number]:focus, select:focus{border-color:var(--brand);}
+  input[readonly]{
+    background:var(--gray-light);color:var(--text-sec);
+    border-style:dashed;cursor:default;
+  }
+
+  /* SLIDERS */
+  .srow{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  .srow label{font-size:12px;color:var(--text-sec);flex:1;}
+  .srow label small{opacity:.65;}
+  .sval{font-size:12px;font-weight:600;min-width:72px;text-align:right;color:var(--text);flex-shrink:0;}
+  input[type=range]{
+    flex-shrink:0;width:90px;
+    accent-color:var(--brand);
+    cursor:pointer;
+  }
+
+  /* ENCARGOS BOX */
+  .enc-box{
+    border:1px solid #f5c5be;background:var(--danger-bg);
+    border-radius:var(--radius);padding:12px;
+    border-left:3px solid var(--red);
+    margin-top:4px;
+  }
+  .enc-note{font-size:11px;color:var(--text-sec);margin-top:8px;line-height:1.6;}
+
+  /* FORMULA BOX */
+  .formula-box{
+    border:1px solid #b8e4d4;background:var(--green-bg);
+    border-radius:var(--radius);padding:12px;
+    border-left:3px solid var(--green);
+    margin-bottom:12px;
+  }
+  .formula-box p{font-size:11px;color:#0a5e3f;line-height:1.9;margin:0;}
+  .formula-box strong{color:#074a31;}
+
+  /* NOTE */
+  .note{
+    font-size:11px;color:var(--text-sec);
+    background:var(--gray-light);border-radius:var(--radius);
+    padding:8px 11px;line-height:1.6;
+  }
+
+  /* VERDICT */
+  #verdict{
+    border-radius:var(--radius);padding:12px 16px;
+    font-size:13px;font-weight:500;line-height:1.7;
+    margin-bottom:20px;
+  }
+  .vrd-ok{background:var(--green-bg);color:#0a5e3f;border:1px solid #b8e4d4;}
+  .vrd-warn{background:var(--amber-bg);color:#7a4b00;border:1px solid #f5d08a;}
+
+  /* CARDS */
+  .cards5{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px;}
+  @media(max-width:800px){.cards5{grid-template-columns:repeat(3,1fr);}}
+  @media(max-width:500px){.cards5{grid-template-columns:1fr 1fr;}}
+  .kcard{
+    background:var(--white);border:1px solid var(--border);
+    border-radius:var(--radius);padding:12px 14px;
+  }
+  .kcard-l{font-size:10px;color:var(--text-sec);margin-bottom:4px;font-weight:500;}
+  .kcard-v{font-size:16px;font-weight:700;color:var(--text);}
+  .kcard-s{font-size:10px;color:var(--text-sec);margin-top:3px;}
+
+  /* DIVIDER */
+  hr.dv{border:none;border-top:1px solid var(--border);margin:18px 0;}
+
+  /* TABLES */
+  .tbl-wrap{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 18px;}
+  table{width:100%;border-collapse:collapse;font-size:12px;}
+  th{text-align:left;font-weight:500;color:var(--text-sec);padding:5px 0;border-bottom:1px solid var(--border);font-size:11px;}
+  td{padding:6px 0;border-bottom:1px solid var(--border);}
+  tr:last-child td{border-bottom:none;}
+
+  /* CHART */
+  .chart-wrap{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 18px;margin-top:20px;}
+  .legend{display:flex;gap:16px;margin-bottom:10px;flex-wrap:wrap;}
+  .legend span{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-sec);}
+  .legend-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
+  .chart-note{font-size:10px;color:var(--text-sec);margin-top:6px;}
+
+  /* BADGE */
+  .badge{
+    display:inline-block;font-size:9px;font-weight:700;
+    padding:2px 6px;border-radius:20px;
+    background:var(--brand-light);color:var(--brand);
+    vertical-align:middle;margin-left:4px;
+    text-transform:uppercase;letter-spacing:.04em;
+  }
+
+  /* FOOTER */
+  footer{
+    text-align:center;font-size:11px;color:var(--text-sec);
+    padding:20px 24px;border-top:1px solid var(--border);
+    background:var(--white);margin-top:40px;
+  }
+
+  /* PRINT */
+  @media print{
+    header{position:static;}
+    body{background:white;}
+    .srow input[type=range]{display:none;}
+    input,select{border:none;background:transparent;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <span class="logo-ap">AP</span>
+    <span class="logo-space"></span>
+    <span class="logo-p">P</span>
+    <span class="logo-house">
+      <svg viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M6.5 1.5L1 5.5V12h4V8.5h3V12h4V5.5L6.5 1.5Z" fill="white"/>
+      </svg>
+    </span>
+    <span class="logo-nto">NTO</span>
+  </div>
+  <span class="header-badge">Simulador de Renegociação · Pro Soluto</span>
+</header>
+
+<main>
+
+  <!-- INDEXADORES -->
+  <div class="idx-bar">
+    <strong>Indexadores FGV</strong><span class="idx-dot">·</span>
+    INCC-M dez/2025: <strong>0,21% a.m.</strong> (acum. 12m: 6,10%)
+    <span class="idx-dot">·</span>
+    IGP-M jan/2026: <strong>+0,41% a.m.</strong>
+    <span class="idx-dot">·</span>
+    IGP-M fev/2026: <strong>−0,73% a.m.</strong> (deflação)
+    <span class="idx-dot">·</span>
+    <span style="opacity:.7;">Fonte: FGV · Atualizado mar/2026</span>
+    <span class="idx-tag">FGV</span>
+  </div>
+
+  <div class="grid2">
+
+    <!-- PAINEL ESQUERDO -->
+    <div class="panel">
+      <p class="sec">Plano original — crédito pro soluto</p>
+      <div class="grid22">
+        <div><label class="lbl">Saldo devedor total (R$)</label>
+          <input type="number" id="saldo" value="50000" min="500" step="500"></div>
+        <div><label class="lbl">Total de parcelas do plano</label>
+          <input type="number" id="N_total" value="48" min="1" max="240" step="1"></div>
+      </div>
+      <div class="grid22">
+        <div><label class="lbl">Parcelas já pagas</label>
+          <input type="number" id="pagas" value="12" min="0" step="1"></div>
+        <div><label class="lbl">Parcelas em atraso</label>
+          <input type="number" id="atraso" value="3" min="1" step="1"></div>
+      </div>
+      <div class="grid22" style="margin-bottom:0;">
+        <div>
+          <label class="lbl">Fase do contrato</label>
+          <select id="fase">
+            <option value="incc">Obras — INCC-M (0,21%)</option>
+            <option value="igpm" selected>Pós-chaves — IGP-M (0,41%)</option>
+          </select>
+        </div>
+        <div><label class="lbl">Taxa de correção a.m. (%)</label>
+          <input type="number" id="taxa_corr" value="0.41" min="-5" max="5" step="0.01"></div>
+      </div>
+      <p id="nota-plano" class="note" style="margin-top:10px;"></p>
+
+      <hr class="dv">
+      <p class="sec">Encargos s/ parcelas em atraso <span class="badge">auto</span></p>
+      <div class="enc-box">
+        <div class="grid3">
+          <div><label class="lbl">Correção monetária (R$)</label>
+            <input type="number" id="corr_val" readonly></div>
+          <div><label class="lbl">Multa 2% (R$)</label>
+            <input type="number" id="multa_val" readonly></div>
+          <div><label class="lbl">Juros mora 1% a.m. (R$)</label>
+            <input type="number" id="juros_val" readonly></div>
+        </div>
+        <p class="enc-note">
+          Correção: parc. atrasadas × ((1+taxa)^n−1) &nbsp;·&nbsp;
+          Multa: 2% × parc. atrasadas &nbsp;·&nbsp;
+          Mora: parc. atrasadas × ((1,01)^n−1) &nbsp;·&nbsp;
+          <strong>Total: <span id="tot-enc">—</span></strong>
+        </p>
+      </div>
+    </div>
+
+    <!-- PAINEL DIREITO -->
+    <div class="panel">
+      <p class="sec">Condições da renegociação</p>
+      <div class="srow"><label>Entrada (R$)</label>
+        <input type="range" id="entrada" min="300" max="2500" step="100" value="500">
+        <span class="sval" id="entrada-out">R$ 500</span></div>
+      <div class="srow"><label>Parcelas do novo plano <small>(máx. 70)</small></label>
+        <input type="range" id="Nrep" min="1" max="70" step="1" value="36">
+        <span class="sval" id="Nrep-out">36 parc.</span></div>
+
+      <div class="formula-box">
+        <p><strong>Fórmula do novo plano:</strong><br>
+          Parcelas em atraso (valor)<br>
+          + correção monetária + multa (2%) + juros de mora (1% a.m.)<br>
+          + parcelas vincendas (valor)<br>
+          − entrada<br>
+          <strong>÷ novo prazo = nova parcela (sem juros futuros)</strong>
+        </p>
+      </div>
+
+      <hr class="dv" style="margin:10px 0;">
+      <p class="sec" style="margin-bottom:6px;">Perda estimada do recebível sem acordo (R$)</p>
+      <input type="number" id="perda_rec" value="20000" min="0" step="500" style="margin-bottom:8px;">
+      <p class="note" style="margin-bottom:14px;">Crédito quirografário sem garantia real: estimativa de perda total ou parcial do recebível por abandono ou inviabilidade de cobrança judicial.</p>
+
+      <hr class="dv" style="margin:10px 0;">
+      <p class="sec" style="margin-bottom:6px;">Quitação total (alternativa ao reparcelamento)</p>
+      <div class="srow"><label>Desconto para quitação à vista</label>
+        <input type="range" id="desc_quit" min="0.5" max="12" step="0.5" value="5">
+        <span class="sval" id="desc-out">5,0%</span></div>
+      <p class="note">Desconto de 0,5% a 12%, somente na quitação total. O novo plano não incide juros nem deságio.</p>
+    </div>
+  </div>
+
+  <!-- VEREDITO -->
+  <div id="verdict"></div>
+
+  <!-- CARDS KPI -->
+  <div class="cards5">
+    <div class="kcard">
+      <p class="kcard-l">Parcela original</p>
+      <p class="kcard-v" id="c-porig">—</p>
+      <p class="kcard-s">saldo ÷ total parcelas</p>
+    </div>
+    <div class="kcard">
+      <p class="kcard-l">Nova base do plano</p>
+      <p class="kcard-v" id="c-base">—</p>
+      <p class="kcard-s">atrasadas + enc. + vincendas − ent.</p>
+    </div>
+    <div class="kcard">
+      <p class="kcard-l">Nova parcela mensal</p>
+      <p class="kcard-v" id="c-nova">—</p>
+      <p class="kcard-s" id="c-nova-sub"></p>
+    </div>
+    <div class="kcard">
+      <p class="kcard-l">Taxa de recuperação</p>
+      <p class="kcard-v" id="c-recup">—</p>
+      <p class="kcard-s">do recebível total</p>
+    </div>
+    <div class="kcard">
+      <p class="kcard-l">Quitação com desconto</p>
+      <p class="kcard-v" id="c-quit">—</p>
+      <p class="kcard-s" id="c-quit-sub"></p>
+    </div>
+  </div>
+
+  <hr class="dv">
+
+  <!-- TABELAS -->
+  <div class="grid2">
+    <div class="tbl-wrap">
+      <p class="sec">Composição detalhada da nova base</p>
+      <table>
+        <thead><tr>
+          <th>Item</th>
+          <th style="text-align:right;">Valor</th>
+          <th style="text-align:right;padding-left:8px;">% da base</th>
+        </tr></thead>
+        <tbody id="tab-divida"></tbody>
+      </table>
+    </div>
+    <div class="tbl-wrap">
+      <p class="sec">Comparativo — perspectiva da construtora</p>
+      <table>
+        <thead><tr>
+          <th>Cenário</th>
+          <th style="text-align:right;">Recuperado</th>
+          <th style="text-align:right;padding-left:8px;">Taxa recup.</th>
+        </tr></thead>
+        <tbody id="tab-cen"></tbody>
+      </table>
+      <p class="note" style="margin-top:10px;">Crédito pro soluto sem garantia real. Taxa de recuperação = total recebido ÷ saldo devedor original.</p>
+    </div>
+  </div>
+
+  <!-- GRÁFICO -->
+  <div class="chart-wrap">
+    <p class="sec" style="margin-bottom:10px;">Fluxo de pagamentos</p>
+    <div class="legend">
+      <span><span class="legend-dot" style="background:#A32D2D;"></span>Pagas (plano original)</span>
+      <span><span class="legend-dot" style="background:#888780;"></span>Em atraso</span>
+      <span><span class="legend-dot" style="background:#1D9E75;"></span>Novo plano reparcelado</span>
+    </div>
+    <div style="position:relative;width:100%;height:220px;">
+      <canvas id="c1"></canvas>
+    </div>
+    <p class="chart-note">P = parcela paga · A = em atraso · Ent. = entrada · N = parcela do novo plano (exibe até 30 barras)</p>
+  </div>
+
+</main>
+
+<footer>
+  <strong style="color:var(--brand);">AP PONTO</strong> &nbsp;·&nbsp;
+  Simulador de Renegociação Pro Soluto &nbsp;·&nbsp;
+  Indexadores FGV · Atualizado mar/2026 &nbsp;·&nbsp;
+  Este simulador tem caráter informativo e não constitui assessoria jurídica ou financeira.
+</footer>
+
+<script>
+let ch1=null;
+const brl=v=>'R$ '+Math.abs(Math.round(v)).toLocaleString('pt-BR');
+const pctN=(a,b)=>b>0?(a/b*100).toFixed(1).replace('.',',')+' %':'—';
+
+document.getElementById('fase').addEventListener('change',function(){
+  document.getElementById('taxa_corr').value=this.value==='incc'?'0.21':'0.41';
+  run();
+});
+
+function trow(label,val,col,bold,pctStr,sep){
+  const fw=bold?'font-weight:600;':'';
+  const bt=sep?'border-top:2px solid #e0ddd5;':'';
+  const lc=bold?'#1a1a18':'#6b6a65';
+  return `<tr>
+    <td style="${fw}${bt}color:${lc};">${label}</td>
+    <td style="${fw}${bt}text-align:right;color:${col||'#1a1a18'};">${val}</td>
+    <td style="${fw}${bt}text-align:right;padding-left:8px;font-size:11px;color:#6b6a65;">${pctStr||''}</td>
+  </tr>`;
+}
+function crow(a,b,c,col){
+  return `<tr>
+    <td style="color:#6b6a65;">${a}</td>
+    <td style="text-align:right;font-weight:600;color:${col||'#1a1a18'};">${b}</td>
+    <td style="text-align:right;padding-left:8px;color:${col||'#6b6a65'};">${c}</td>
+  </tr>`;
+}
+
+function run(){
+  const saldo=+document.getElementById('saldo').value||50000;
+  const N_total=Math.max(1,+document.getElementById('N_total').value||48);
+  const pagas=Math.min(Math.max(0,+document.getElementById('pagas').value||12),N_total-1);
+  const atraso=Math.max(1,Math.min(+document.getElementById('atraso').value||3,N_total-pagas));
+  const taxa_corr=(+document.getElementById('taxa_corr').value||0)/100;
+  const entrada=+document.getElementById('entrada').value;
+  const Nrep=+document.getElementById('Nrep').value;
+  const desc_quit=+document.getElementById('desc_quit').value/100;
+  const perda_rec=+document.getElementById('perda_rec').value||20000;
+
+  const p_orig=saldo/N_total;
+  const vincendas=N_total-pagas-atraso;
+  const v_atrasadas=p_orig*atraso;
+  const v_vincendas=p_orig*vincendas;
+
+  // Encargos automáticos
+  const corr_val=v_atrasadas*(Math.pow(1+taxa_corr,atraso)-1);
+  const multa_val=v_atrasadas*0.02;
+  const juros_val=v_atrasadas*(Math.pow(1.01,atraso)-1);
+  const total_enc=corr_val+multa_val+juros_val;
+
+  document.getElementById('corr_val').value=corr_val.toFixed(2);
+  document.getElementById('multa_val').value=multa_val.toFixed(2);
+  document.getElementById('juros_val').value=juros_val.toFixed(2);
+  document.getElementById('tot-enc').textContent=brl(total_enc);
+
+  // Nova base: atrasadas + encargos + vincendas - entrada
+  const nova_base=Math.max(0,v_atrasadas+total_enc+v_vincendas-entrada);
+  const nova_parc=nova_base/Nrep;
+  const total_novo_plano=entrada+nova_parc*Nrep;
+  const valor_quit=saldo*(1-desc_quit);
+  const recup_pct=saldo>0?(total_novo_plano/saldo*100):0;
+
+  document.getElementById('nota-plano').innerHTML=
+    'Parcela original: <strong>'+brl(p_orig)+'</strong>'
+    +' ('+brl(saldo)+' ÷ '+N_total+' parc.)'
+    +' · Pagas: <strong>'+pagas+'</strong>'
+    +' · Em atraso: <strong>'+atraso+'</strong>'
+    +' · Vincendas: <strong>'+vincendas+'</strong>';
+
+  // Cards
+  document.getElementById('c-porig').textContent=brl(p_orig);
+  document.getElementById('c-base').textContent=brl(nova_base);
+
+  const novaEl=document.getElementById('c-nova');
+  novaEl.textContent=brl(nova_parc);
+  novaEl.style.color=nova_parc<=p_orig?'#0F6E56':'#A32D2D';
+  const novaSub=document.getElementById('c-nova-sub');
+  novaSub.textContent=(nova_parc<p_orig?'↓ abaixo':nova_parc>p_orig?'↑ acima':'= igual')+' da parc. original';
+  novaSub.style.color=nova_parc<=p_orig?'#0F6E56':'#A32D2D';
+
+  const recupEl=document.getElementById('c-recup');
+  recupEl.textContent=recup_pct.toFixed(0)+' %';
+  recupEl.style.color=recup_pct>=98?'#0F6E56':recup_pct>=75?'#BA7517':'#A32D2D';
+
+  document.getElementById('c-quit').textContent=brl(valor_quit);
+  document.getElementById('c-quit-sub').textContent='desconto de '+(desc_quit*100).toFixed(1).replace('.',',')+' % no saldo';
+
+  // Tabela composição
+  const base_total=v_atrasadas+total_enc+v_vincendas;
+  document.getElementById('tab-divida').innerHTML=
+    trow('Parcelas em atraso ('+atraso+'× '+brl(p_orig)+')',brl(v_atrasadas),'#888780',false,pctN(v_atrasadas,base_total))+
+    trow('(+) Correção monetária ['+(taxa_corr*100).toFixed(2)+'% a.m. × '+atraso+'m]',brl(corr_val),'#A32D2D',false,pctN(corr_val,base_total))+
+    trow('(+) Multa contratual [2% × atrasadas]',brl(multa_val),'#A32D2D',false,pctN(multa_val,base_total))+
+    trow('(+) Juros de mora [1% a.m. × '+atraso+'m]',brl(juros_val),'#A32D2D',false,pctN(juros_val,base_total))+
+    trow('(+) Parcelas vincendas ('+vincendas+'× '+brl(p_orig)+')',brl(v_vincendas),'#5F5E5A',false,pctN(v_vincendas,base_total))+
+    trow('Subtotal',brl(base_total),'#1a1a18',true,'100%',true)+
+    trow('(−) Entrada','−'+brl(entrada),'#0F6E56',false,'')+
+    trow('Nova base (÷ '+Nrep+' parc., sem juros futuros)',brl(nova_base),'#1a1a18',true,'',true)+
+    trow('Nova parcela mensal',brl(nova_parc),nova_parc<=p_orig?'#0F6E56':'#A32D2D',true,'');
+
+  // Tabela cenários
+  document.getElementById('tab-cen').innerHTML=
+    crow('Novo plano reparcelado',brl(total_novo_plano),recup_pct.toFixed(0)+'% do saldo devedor','#0F6E56')+
+    crow('Quitação total à vista',brl(valor_quit),(desc_quit*100).toFixed(1).replace('.',',')+' % de desconto','#1a4f8a')+
+    crow('Sem acordo — perda estimada','−'+brl(perda_rec),'0% de recuperação','#A32D2D');
+
+  // Veredito
+  const vrd=document.getElementById('verdict');
+  const dif=((nova_parc/p_orig-1)*100);
+  const minMeses=Math.ceil(nova_base/p_orig);
+  if(nova_parc<=p_orig){
+    vrd.className='vrd-ok';
+    vrd.innerHTML='✓ Novo plano viável — nova parcela ('+brl(nova_parc)+') é '
+      +(Math.abs(dif)<0.5?'igual à':'<strong>'+Math.abs(dif).toFixed(0)+'% menor</strong> que a')
+      +' parcela original ('+brl(p_orig)+'). '
+      +'Encargos apurados: correção '+brl(corr_val)+' + multa '+brl(multa_val)+' + mora '+brl(juros_val)+' = <strong>'+brl(total_enc)+'</strong>. '
+      +'A construtora recupera <strong>'+recup_pct.toFixed(0)+'%</strong> do recebível frente à perda estimada de '+brl(perda_rec)+'.';
+  } else {
+    vrd.className='vrd-warn';
+    vrd.innerHTML='⚡ Nova parcela ('+brl(nova_parc)+') supera em '+Math.abs(dif).toFixed(0)+'% a parcela original ('+brl(p_orig)+') — risco de reincidência em crédito sem garantia real. '
+      +'Para equiparar, amplie o prazo para pelo menos <strong>'+minMeses+' meses</strong> ou aumente a entrada.';
+  }
+
+  // Gráfico
+  const labels=[],dOrig=[],dAtraso=[],dNovo=[];
+  const exibePagas=Math.min(pagas,10);
+  for(let t=0;t<exibePagas;t++){
+    labels.push('P'+(pagas-exibePagas+t+1));
+    dOrig.push(p_orig);dAtraso.push(null);dNovo.push(null);
+  }
+  for(let t=1;t<=atraso;t++){
+    labels.push('A'+t);
+    dOrig.push(null);dAtraso.push(p_orig);dNovo.push(null);
+  }
+  labels.push('Ent.');dOrig.push(null);dAtraso.push(null);dNovo.push(entrada);
+  const showN=Math.min(Nrep,30);
+  for(let t=1;t<=showN;t++){
+    labels.push('N'+t);
+    dOrig.push(null);dAtraso.push(null);dNovo.push(nova_parc);
+  }
+  if(Nrep>30){labels.push('…');dOrig.push(null);dAtraso.push(null);dNovo.push(nova_parc);}
+
+  if(ch1){
+    ch1.data.labels=labels;
+    ch1.data.datasets[0].data=dOrig;
+    ch1.data.datasets[1].data=dAtraso;
+    ch1.data.datasets[2].data=dNovo;
+    ch1.update('none');
+  } else {
+    ch1=new Chart(document.getElementById('c1'),{
+      type:'bar',
+      data:{labels,datasets:[
+        {data:dOrig,backgroundColor:'#A32D2D',borderWidth:0,borderRadius:2},
+        {data:dAtraso,backgroundColor:'#888780',borderWidth:0,borderRadius:2},
+        {data:dNovo,backgroundColor:'#1D9E75',borderWidth:0,borderRadius:2}
+      ]},
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{callbacks:{
+          label:ctx=>ctx.raw!=null?brl(ctx.raw):null,
+          title:ctx=>ctx[0].label
+        }}},
+        scales:{
+          x:{ticks:{font:{size:10},maxTicksLimit:24,autoSkip:true},grid:{display:false}},
+          y:{ticks:{font:{size:10},callback:v=>'R$'+Math.round(v/1000*10)/10+'k'},grid:{color:'rgba(0,0,0,.06)'}}
+        }
+      }
+    });
+  }
+}
+
+['saldo','N_total','pagas','atraso','taxa_corr','perda_rec'].forEach(id=>
+  document.getElementById(id).addEventListener('input',run));
+[
+  ['entrada','entrada-out',v=>'R$ '+Number(v).toLocaleString('pt-BR')],
+  ['Nrep','Nrep-out',v=>v+' parc.'],
+  ['desc_quit','desc-out',v=>(+v).toFixed(1).replace('.',',')+' %'],
+].forEach(([id,out,f])=>document.getElementById(id).addEventListener('input',e=>{
+  document.getElementById(out).textContent=f(e.target.value);run();
+}));
+run();
+</script>
+</body>
+</html>
