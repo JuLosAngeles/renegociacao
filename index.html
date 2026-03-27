@@ -16,7 +16,6 @@
     --text:#1a1a18;--text-sec:#6b6a65;--white:#ffffff;
     --radius:8px;--radius-lg:12px;
   }
-  *{box-sizing:border-box;}
   body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f2f1ee;color:var(--text);font-size:14px;line-height:1.5;min-height:100vh;}
   header{background:var(--white);border-bottom:1px solid var(--border);padding:0 32px;display:flex;align-items:center;justify-content:space-between;height:64px;position:sticky;top:0;z-index:100;}
   .logo{display:flex;align-items:center;}
@@ -44,8 +43,8 @@
   .srow label small{opacity:.65;}
   .sval{font-size:12px;font-weight:600;min-width:72px;text-align:right;color:var(--text);flex-shrink:0;}
   input[type=range]{flex-shrink:0;width:90px;accent-color:var(--brand);cursor:pointer;}
-  .enc-box{border:1px solid #b8d4f0;background:var(--blue-bg);border-radius:var(--radius);padding:12px;border-left:3px solid var(--blue);margin-top:4px;}
-  .enc-note{font-size:11px;color:var(--text-sec);margin-top:8px;line-height:1.6;}
+  .corr-box{border:1px solid #b8d4f0;background:var(--blue-bg);border-radius:var(--radius);padding:12px;border-left:3px solid var(--blue);margin-top:4px;}
+  .corr-note{font-size:11px;color:var(--text-sec);margin-top:8px;line-height:1.6;}
   .formula-box{border:1px solid #b8e4d4;background:var(--green-bg);border-radius:var(--radius);padding:12px;border-left:3px solid var(--green);margin-bottom:12px;}
   .formula-box p{font-size:11px;color:#0a5e3f;line-height:1.9;margin:0;}
   .formula-box strong{color:#074a31;}
@@ -105,68 +104,77 @@
   </div>
 
   <div class="grid2">
+
     <div class="panel">
-      <p class="sec">Plano original — crédito pro soluto</p>
-      <div class="grid22">
-        <div><label class="lbl">Saldo devedor total (R$)</label><input type="number" id="saldo" value="50000" min="500" step="500"></div>
-        <div><label class="lbl">Total de parcelas do plano</label><input type="number" id="N_total" value="48" min="1" max="240" step="1"></div>
+      <p class="sec">Dados da dívida</p>
+      <div style="margin-bottom:10px;">
+        <label class="lbl">Saldo devedor total (R$)</label>
+        <input type="number" id="saldo" value="50000" min="500" step="500">
       </div>
       <div class="grid22">
-        <div><label class="lbl">Parcelas já pagas</label><input type="number" id="pagas" value="12" min="0" step="1"></div>
-        <div><label class="lbl">Parcelas em atraso</label><input type="number" id="atraso" value="3" min="1" step="1"></div>
+        <div><label class="lbl">Parcelas vencidas (em atraso)</label>
+          <input type="number" id="vencidas" value="3" min="1" step="1"></div>
+        <div><label class="lbl">Parcelas a vencer (vincendas)</label>
+          <input type="number" id="avencer" value="33" min="0" step="1"></div>
       </div>
-      <div class="grid22" style="margin-bottom:0;">
-        <div>
-          <label class="lbl">Fase do contrato</label>
+      <p id="nota-plano" class="note" style="margin-bottom:10px;"></p>
+
+      <hr class="dv">
+      <p class="sec">Fase e correção monetária <span class="badge">auto · FGV</span></p>
+      <div class="grid22">
+        <div><label class="lbl">Fase do contrato</label>
           <select id="fase">
             <option value="incc">Obras — INCC-M (0,21%)</option>
             <option value="igpm" selected>Pós-chaves — IGP-M (0,41%)</option>
-          </select>
-        </div>
-        <div><label class="lbl">Taxa de correção a.m. (%)</label><input type="number" id="taxa_corr" value="0.41" min="-5" max="5" step="0.01"></div>
+          </select></div>
+        <div><label class="lbl">Taxa de correção a.m. (%)</label>
+          <input type="number" id="taxa_corr" value="0.41" min="-5" max="5" step="0.01"></div>
       </div>
-      <p id="nota-plano" class="note" style="margin-top:10px;"></p>
-
-      <hr class="dv">
-      <p class="sec">Correção monetária s/ parcelas em atraso <span class="badge">auto · FGV</span></p>
-      <div class="enc-box">
+      <div class="corr-box">
         <div class="grid22">
-          <div><label class="lbl">Valor das parcelas em atraso (R$)</label><input id="v_atrasadas" readonly></div>
-          <div><label class="lbl">Correção monetária acumulada (R$)</label><input id="corr_val" readonly></div>
+          <div><label class="lbl">Valor das parcelas vencidas (R$)</label>
+            <input id="v_vencidas" readonly></div>
+          <div><label class="lbl">Correção monetária acumulada (R$)</label>
+            <input id="corr_val" readonly></div>
         </div>
-        <p class="enc-note">
-          Fórmula: parc. atrasadas × ((1 + taxa)^n − 1) &nbsp;·&nbsp;
-          Capitalização composta pelo nº de meses em atraso &nbsp;·&nbsp;
-          Não incidem multa nem juros de mora na renegociação &nbsp;·&nbsp;
-          <strong>Total corrigido: <span id="tot-corr">—</span></strong>
+        <p class="corr-note">
+          Parc. vencidas × ((1 + taxa)^n − 1) &nbsp;·&nbsp;
+          Correção incide <strong>somente sobre as vencidas</strong> &nbsp;·&nbsp;
+          Parcelas a vencer entram pelo valor nominal &nbsp;·&nbsp;
+          <strong>Vencidas corrigidas: <span id="tot-corr">—</span></strong>
         </p>
       </div>
     </div>
 
     <div class="panel">
-      <p class="sec">Condições da renegociação</p>
-      <div class="srow"><label>Entrada (R$)</label><input type="range" id="entrada" min="300" max="2500" step="100" value="500"><span class="sval" id="entrada-out">R$ 500</span></div>
-      <div class="srow"><label>Parcelas do novo plano <small>(máx. 70)</small></label><input type="range" id="Nrep" min="1" max="70" step="1" value="36"><span class="sval" id="Nrep-out">36 parc.</span></div>
+      <p class="sec">Condições do acordo</p>
+      <div class="srow"><label>Entrada (R$)</label>
+        <input type="range" id="entrada" min="300" max="2500" step="100" value="500">
+        <span class="sval" id="entrada-out">R$ 500</span></div>
+      <div class="srow"><label>Parcelas do novo plano <small>(máx. 70)</small></label>
+        <input type="range" id="Nrep" min="1" max="70" step="1" value="36">
+        <span class="sval" id="Nrep-out">36 parc.</span></div>
 
       <div class="formula-box">
         <p><strong>Fórmula do novo plano:</strong><br>
-          Parcelas em atraso (valor nominal)<br>
-          + correção monetária acumulada (INCC-M ou IGP-M)<br>
-          + parcelas vincendas (valor nominal)<br>
+          Parcelas vencidas × (1 + taxa)^n &nbsp;<small style="opacity:.75;">← corrigidas pelo indexador</small><br>
+          + parcelas a vencer (valor nominal, sem correção)<br>
           − entrada<br>
           <strong>÷ novo prazo = nova parcela (sem juros futuros)</strong>
         </p>
       </div>
 
-      <hr class="dv" style="margin:10px 0;">
-      <p class="sec" style="margin-bottom:6px;">Perda estimada do recebível sem acordo (R$)</p>
-      <input type="number" id="perda_rec" value="20000" min="0" step="500" style="margin-bottom:8px;">
-      <p class="note" style="margin-bottom:14px;">Crédito quirografário sem garantia real: estimativa de perda total ou parcial do recebível por abandono ou inviabilidade de cobrança judicial.</p>
-
-      <hr class="dv" style="margin:10px 0;">
+      <hr class="dv" style="margin:12px 0;">
       <p class="sec" style="margin-bottom:6px;">Quitação total (alternativa ao reparcelamento)</p>
-      <div class="srow"><label>Desconto para quitação à vista</label><input type="range" id="desc_quit" min="0.5" max="12" step="0.5" value="5"><span class="sval" id="desc-out">5,0%</span></div>
+      <div class="srow"><label>Desconto para quitação à vista</label>
+        <input type="range" id="desc_quit" min="0.5" max="12" step="0.5" value="5">
+        <span class="sval" id="desc-out">5,0%</span></div>
       <p class="note">Desconto de 0,5% a 12%, somente na quitação total. O novo plano não incide juros nem deságio.</p>
+
+      <hr class="dv" style="margin:12px 0;">
+      <p class="note" style="border-left:3px solid #E24B4A;border-radius:0 var(--radius) var(--radius) 0;background:var(--gray-light);">
+        <strong>Perda sem acordo = saldo devedor total</strong> — crédito quirografário sem garantia real. Calculado automaticamente a partir do saldo informado.
+      </p>
     </div>
   </div>
 
@@ -174,17 +182,17 @@
 
   <div class="cards5">
     <div class="kcard"><p class="kcard-l">Parcela original</p><p class="kcard-v" id="c-porig">—</p><p class="kcard-s">saldo ÷ total parcelas</p></div>
-    <div class="kcard"><p class="kcard-l">Nova base do plano</p><p class="kcard-v" id="c-base">—</p><p class="kcard-s">atrasadas + correção + vincendas − ent.</p></div>
+    <div class="kcard"><p class="kcard-l">Vencidas corrigidas</p><p class="kcard-v" id="c-vcorr">—</p><p class="kcard-s">nominal + correção FGV</p></div>
+    <div class="kcard"><p class="kcard-l">Nova base do plano</p><p class="kcard-v" id="c-base">—</p><p class="kcard-s">vencidas corr. + a vencer − ent.</p></div>
     <div class="kcard"><p class="kcard-l">Nova parcela mensal</p><p class="kcard-v" id="c-nova">—</p><p class="kcard-s" id="c-nova-sub"></p></div>
-    <div class="kcard"><p class="kcard-l">Taxa de recuperação</p><p class="kcard-v" id="c-recup">—</p><p class="kcard-s">do recebível total</p></div>
-    <div class="kcard"><p class="kcard-l">Quitação com desconto</p><p class="kcard-v" id="c-quit">—</p><p class="kcard-s" id="c-quit-sub"></p></div>
+    <div class="kcard"><p class="kcard-l">Taxa de recuperação</p><p class="kcard-v" id="c-recup">—</p><p class="kcard-s">vs perda total sem acordo</p></div>
   </div>
 
   <hr class="dv">
 
   <div class="grid2">
     <div class="tbl-wrap">
-      <p class="sec">Composição detalhada da nova base</p>
+      <p class="sec">Composição da nova base</p>
       <table>
         <thead><tr><th>Item</th><th style="text-align:right;">Valor</th><th style="text-align:right;padding-left:8px;">% da base</th></tr></thead>
         <tbody id="tab-divida"></tbody>
@@ -196,19 +204,20 @@
         <thead><tr><th>Cenário</th><th style="text-align:right;">Recuperado</th><th style="text-align:right;padding-left:8px;">Taxa recup.</th></tr></thead>
         <tbody id="tab-cen"></tbody>
       </table>
-      <p class="note" style="margin-top:10px;">Crédito pro soluto sem garantia real. Taxa de recuperação = total recebido ÷ saldo devedor original.</p>
+      <p class="note" style="margin-top:10px;">Sem acordo, a perda estimada é o saldo devedor total — crédito quirografário sem garantia real.</p>
     </div>
   </div>
 
   <div class="chart-wrap">
-    <p class="sec" style="margin-bottom:10px;">Fluxo de pagamentos</p>
+    <p class="sec" style="margin-bottom:10px;">Composição da dívida e novo fluxo de pagamentos</p>
     <div class="legend">
-      <span><span class="legend-dot" style="background:#A32D2D;"></span>Pagas (plano original)</span>
-      <span><span class="legend-dot" style="background:#888780;"></span>Em atraso</span>
+      <span><span class="legend-dot" style="background:#888780;"></span>Vencidas (nominal)</span>
+      <span><span class="legend-dot" style="background:#378ADD;"></span>Correção monetária</span>
+      <span><span class="legend-dot" style="background:#5F5E5A;"></span>A vencer</span>
       <span><span class="legend-dot" style="background:#1D9E75;"></span>Novo plano reparcelado</span>
     </div>
     <div style="position:relative;width:100%;height:220px;"><canvas id="c1"></canvas></div>
-    <p style="font-size:10px;color:var(--text-sec);margin-top:6px;">P = parcela paga · A = em atraso · Ent. = entrada · N = nova parcela (exibe até 30 barras)</p>
+    <p style="font-size:10px;color:var(--text-sec);margin-top:6px;">V = vencida · AV = a vencer · Ent. = entrada · N = nova parcela (exibe até 30 barras por grupo)</p>
   </div>
 
 </main>
@@ -226,138 +235,138 @@ const brl=v=>'R$ '+Math.abs(Math.round(v)).toLocaleString('pt-BR');
 const pctN=(a,b)=>b>0?(a/b*100).toFixed(1).replace('.',',')+' %':'—';
 
 document.getElementById('fase').addEventListener('change',function(){
-  document.getElementById('taxa_corr').value=this.value==='incc'?'0.21':'0.41';
-  run();
+  document.getElementById('taxa_corr').value=this.value==='incc'?'0.21':'0.41';run();
 });
 
-function trow(label,val,col,bold,pctStr,sep){
-  const fw=bold?'font-weight:600;':'';
-  const bt=sep?'border-top:2px solid #e0ddd5;':'';
-  const lc=bold?'#1a1a18':'#6b6a65';
-  return `<tr><td style="${fw}${bt}color:${lc};">${label}</td><td style="${fw}${bt}text-align:right;color:${col||'#1a1a18'};">${val}</td><td style="${fw}${bt}text-align:right;padding-left:8px;font-size:11px;color:#6b6a65;">${pctStr||''}</td></tr>`;
+function trow(l,v,c,b,p,s){
+  const fw=b?'font-weight:600;':'';const bt=s?'border-top:2px solid #e0ddd5;':'';const lc=b?'#1a1a18':'#6b6a65';
+  return `<tr><td style="${fw}${bt}color:${lc};">${l}</td><td style="${fw}${bt}text-align:right;color:${c||'#1a1a18'};">${v}</td><td style="${fw}${bt}text-align:right;padding-left:8px;font-size:11px;color:#6b6a65;">${p||''}</td></tr>`;
 }
 function crow(a,b,c,col){
   return `<tr><td style="color:#6b6a65;">${a}</td><td style="text-align:right;font-weight:600;color:${col||'#1a1a18'};">${b}</td><td style="text-align:right;padding-left:8px;color:${col||'#6b6a65'};">${c}</td></tr>`;
 }
 
 function run(){
-  const saldo=+document.getElementById('saldo').value||50000;
-  const N_total=Math.max(1,+document.getElementById('N_total').value||48);
-  const pagas=Math.min(Math.max(0,+document.getElementById('pagas').value||12),N_total-1);
-  const atraso=Math.max(1,Math.min(+document.getElementById('atraso').value||3,N_total-pagas));
-  const taxa_corr=(+document.getElementById('taxa_corr').value||0)/100;
-  const entrada=+document.getElementById('entrada').value;
-  const Nrep=+document.getElementById('Nrep').value;
-  const desc_quit=+document.getElementById('desc_quit').value/100;
-  const perda_rec=+document.getElementById('perda_rec').value||20000;
+  const saldo    = +document.getElementById('saldo').value||50000;
+  const venc     = Math.max(1,+document.getElementById('vencidas').value||3);
+  const avenc    = Math.max(0,+document.getElementById('avencer').value||33);
+  const taxa     = (+document.getElementById('taxa_corr').value||0)/100;
+  const entrada  = +document.getElementById('entrada').value;
+  const Nrep     = +document.getElementById('Nrep').value;
+  const desc_quit= +document.getElementById('desc_quit').value/100;
+  const fase_label = document.getElementById('fase').value==='incc'?'INCC-M':'IGP-M';
 
-  const p_orig=saldo/N_total;
-  const vincendas=N_total-pagas-atraso;
-  const v_atrasadas=p_orig*atraso;
-  const v_vincendas=p_orig*vincendas;
-  const corr_val=v_atrasadas*(Math.pow(1+taxa_corr,atraso)-1);
+  const N_total = venc+avenc;
+  const p_orig  = N_total>0 ? saldo/N_total : 0;
 
-  document.getElementById('v_atrasadas').value=v_atrasadas.toFixed(2);
-  document.getElementById('corr_val').value=corr_val.toFixed(2);
-  document.getElementById('tot-corr').textContent=brl(v_atrasadas+corr_val);
+  const v_vencidas_nom  = p_orig*venc;
+  const corr_val        = v_vencidas_nom*(Math.pow(1+taxa,venc)-1);
+  const v_vencidas_corr = v_vencidas_nom+corr_val;
+  const v_avencer       = p_orig*avenc;
 
-  const nova_base=Math.max(0,v_atrasadas+corr_val+v_vincendas-entrada);
-  const nova_parc=nova_base/Nrep;
-  const total_novo_plano=entrada+nova_parc*Nrep;
-  const valor_quit=saldo*(1-desc_quit);
-  const recup_pct=saldo>0?(total_novo_plano/saldo*100):0;
-  const fase_label=document.getElementById('fase').value==='incc'?'INCC-M':'IGP-M';
+  const nova_base        = Math.max(0, v_vencidas_corr+v_avencer-entrada);
+  const nova_parc        = Nrep>0 ? nova_base/Nrep : 0;
+  const total_novo_plano = entrada+nova_parc*Nrep;
+  const valor_quit       = saldo*(1-desc_quit);
 
-  document.getElementById('nota-plano').innerHTML=
-    'Parcela original: <strong>'+brl(p_orig)+'</strong> ('+brl(saldo)+' ÷ '+N_total+' parc.)'
-    +' · Pagas: <strong>'+pagas+'</strong>'
-    +' · Em atraso: <strong>'+atraso+'</strong>'
-    +' · Vincendas: <strong>'+vincendas+'</strong>';
+  // Perda sem acordo = saldo devedor total (automático)
+  const perda_rec = saldo;
+  const recup_pct = saldo>0 ? (total_novo_plano/saldo*100) : 0;
 
-  document.getElementById('c-porig').textContent=brl(p_orig);
-  document.getElementById('c-base').textContent=brl(nova_base);
+  document.getElementById('v_vencidas').value = v_vencidas_nom.toFixed(2);
+  document.getElementById('corr_val').value   = corr_val.toFixed(2);
+  document.getElementById('tot-corr').textContent = brl(v_vencidas_corr);
+  document.getElementById('nota-plano').innerHTML =
+    'Total de parcelas: <strong>'+N_total+'</strong> ('+venc+' vencidas + '+avenc+' a vencer)'
+    +' · Parcela original: <strong>'+brl(p_orig)+'</strong>'
+    +' ('+brl(saldo)+' ÷ '+N_total+')';
 
-  const novaEl=document.getElementById('c-nova');
-  novaEl.textContent=brl(nova_parc);
-  novaEl.style.color=nova_parc<=p_orig?'#0F6E56':'#A32D2D';
-  const novaSub=document.getElementById('c-nova-sub');
-  novaSub.textContent=(nova_parc<p_orig?'↓ abaixo':nova_parc>p_orig?'↑ acima':'= igual')+' da parc. original';
-  novaSub.style.color=nova_parc<=p_orig?'#0F6E56':'#A32D2D';
+  document.getElementById('c-porig').textContent = brl(p_orig);
+  document.getElementById('c-vcorr').textContent = brl(v_vencidas_corr);
+  document.getElementById('c-base').textContent  = brl(nova_base);
 
-  const recupEl=document.getElementById('c-recup');
-  recupEl.textContent=recup_pct.toFixed(0)+' %';
-  recupEl.style.color=recup_pct>=98?'#0F6E56':recup_pct>=75?'#BA7517':'#A32D2D';
+  const novaEl = document.getElementById('c-nova');
+  novaEl.textContent = brl(nova_parc);
+  novaEl.style.color = nova_parc<=p_orig?'#0F6E56':'#A32D2D';
+  const novaSub = document.getElementById('c-nova-sub');
+  novaSub.textContent = (nova_parc<p_orig?'↓ abaixo':nova_parc>p_orig?'↑ acima':'= igual')+' da parc. original';
+  novaSub.style.color = nova_parc<=p_orig?'#0F6E56':'#A32D2D';
 
-  document.getElementById('c-quit').textContent=brl(valor_quit);
-  document.getElementById('c-quit-sub').textContent='desconto de '+(desc_quit*100).toFixed(1).replace('.',',')+' % no saldo';
+  const recupEl = document.getElementById('c-recup');
+  recupEl.textContent = recup_pct.toFixed(0)+' %';
+  recupEl.style.color = recup_pct>=98?'#0F6E56':recup_pct>=75?'#BA7517':'#A32D2D';
 
-  const base_total=v_atrasadas+corr_val+v_vincendas;
-  document.getElementById('tab-divida').innerHTML=
-    trow('Parcelas em atraso ('+atraso+'× '+brl(p_orig)+')',brl(v_atrasadas),'#888780',false,pctN(v_atrasadas,base_total))+
-    trow('(+) Correção monetária ['+(taxa_corr*100).toFixed(2)+'% a.m. × '+atraso+'m comp. — '+fase_label+']',brl(corr_val),'#378ADD',false,pctN(corr_val,base_total))+
-    trow('(+) Parcelas vincendas ('+vincendas+'× '+brl(p_orig)+')',brl(v_vincendas),'#5F5E5A',false,pctN(v_vincendas,base_total))+
-    trow('Subtotal',brl(base_total),'#1a1a18',true,'100%',true)+
+  const base_total = v_vencidas_corr+v_avencer;
+  document.getElementById('tab-divida').innerHTML =
+    trow('Parcelas vencidas — nominal ('+venc+'× '+brl(p_orig)+')',brl(v_vencidas_nom),'#888780',false,pctN(v_vencidas_nom,base_total))+
+    trow('(+) Correção monetária ['+(taxa*100).toFixed(2)+'% a.m.×'+venc+'m — '+fase_label+']',brl(corr_val),'#378ADD',false,pctN(corr_val,base_total))+
+    trow('Subtotal vencidas corrigidas',brl(v_vencidas_corr),'#1a1a18',true,pctN(v_vencidas_corr,base_total))+
+    trow('(+) Parcelas a vencer — nominal ('+avenc+'× '+brl(p_orig)+')',brl(v_avencer),'#5F5E5A',false,pctN(v_avencer,base_total))+
+    trow('Subtotal — total da dívida renegociada',brl(base_total),'#1a1a18',true,'100%',true)+
     trow('(−) Entrada','−'+brl(entrada),'#0F6E56',false,'')+
     trow('Nova base (÷ '+Nrep+' parc., sem juros futuros)',brl(nova_base),'#1a1a18',true,'',true)+
     trow('Nova parcela mensal',brl(nova_parc),nova_parc<=p_orig?'#0F6E56':'#A32D2D',true,'');
 
-  document.getElementById('tab-cen').innerHTML=
+  document.getElementById('tab-cen').innerHTML =
     crow('Novo plano reparcelado',brl(total_novo_plano),recup_pct.toFixed(0)+'% do saldo devedor','#0F6E56')+
     crow('Quitação total à vista',brl(valor_quit),(desc_quit*100).toFixed(1).replace('.',',')+' % de desconto','#1a4f8a')+
-    crow('Sem acordo — perda estimada','−'+brl(perda_rec),'0% de recuperação','#A32D2D');
+    crow('Sem acordo — perda total','−'+brl(perda_rec),'= saldo devedor total','#A32D2D');
 
-  const vrd=document.getElementById('verdict');
-  const dif=((nova_parc/p_orig-1)*100);
-  const minMeses=Math.ceil(nova_base/p_orig);
+  const vrd = document.getElementById('verdict');
+  const dif = ((nova_parc/p_orig-1)*100);
+  const minMeses = Math.ceil(nova_base/p_orig);
   if(nova_parc<=p_orig){
     vrd.className='vrd-ok';
-    vrd.innerHTML='✓ Novo plano viável — nova parcela ('+brl(nova_parc)+') é '
+    vrd.innerHTML = '✓ Novo plano viável — nova parcela ('+brl(nova_parc)+') é '
       +(Math.abs(dif)<0.5?'igual à':'<strong>'+Math.abs(dif).toFixed(0)+'% menor</strong> que a')
       +' parcela original ('+brl(p_orig)+'). '
-      +'Correção monetária ('+fase_label+'): '+brl(corr_val)+' ('+(taxa_corr*100).toFixed(2)+'% a.m. × '+atraso+' meses). '
-      +'A construtora recupera <strong>'+recup_pct.toFixed(0)+'%</strong> do recebível frente à perda estimada de '+brl(perda_rec)+'.';
+      +'Correção ('+fase_label+'): '+brl(corr_val)+'. '
+      +'Total renegociado: '+brl(v_vencidas_corr)+' (vencidas corrigidas) + '+brl(v_avencer)+' (a vencer). '
+      +'A construtora recupera <strong>'+recup_pct.toFixed(0)+'%</strong> do recebível, frente à perda total de '+brl(perda_rec)+' sem acordo.';
   } else {
     vrd.className='vrd-warn';
-    vrd.innerHTML='⚡ Nova parcela ('+brl(nova_parc)+') supera em '+Math.abs(dif).toFixed(0)+'% a parcela original ('+brl(p_orig)+') — risco de reincidência. '
+    vrd.innerHTML = '⚡ Nova parcela ('+brl(nova_parc)+') supera em '+Math.abs(dif).toFixed(0)+'% a parcela original ('+brl(p_orig)+') — risco de reincidência. '
       +'Para equiparar, amplie o prazo para pelo menos <strong>'+minMeses+' meses</strong> ou aumente a entrada.';
   }
 
-  const labels=[],dOrig=[],dAtraso=[],dNovo=[];
-  const exibePagas=Math.min(pagas,10);
-  for(let t=0;t<exibePagas;t++){labels.push('P'+(pagas-exibePagas+t+1));dOrig.push(p_orig);dAtraso.push(null);dNovo.push(null);}
-  for(let t=1;t<=atraso;t++){labels.push('A'+t);dOrig.push(null);dAtraso.push(p_orig);dNovo.push(null);}
-  labels.push('Ent.');dOrig.push(null);dAtraso.push(null);dNovo.push(entrada);
+  const labels=[],dVenc=[],dCorr=[],dAvenc=[],dNovo=[];
+  const showV=Math.min(venc,10);
+  for(let t=0;t<showV;t++){labels.push('V'+(t+1));dVenc.push(p_orig);dCorr.push(corr_val/venc);dAvenc.push(null);dNovo.push(null);}
+  if(venc>10){labels.push('…');dVenc.push(p_orig);dCorr.push(corr_val/venc);dAvenc.push(null);dNovo.push(null);}
+  const showAV=Math.min(avenc,10);
+  for(let t=0;t<showAV;t++){labels.push('AV'+(t+1));dVenc.push(null);dCorr.push(null);dAvenc.push(p_orig);dNovo.push(null);}
+  if(avenc>10){labels.push('…');dVenc.push(null);dCorr.push(null);dAvenc.push(p_orig);dNovo.push(null);}
+  labels.push('Ent.');dVenc.push(null);dCorr.push(null);dAvenc.push(null);dNovo.push(entrada);
   const showN=Math.min(Nrep,30);
-  for(let t=1;t<=showN;t++){labels.push('N'+t);dOrig.push(null);dAtraso.push(null);dNovo.push(nova_parc);}
-  if(Nrep>30){labels.push('…');dOrig.push(null);dAtraso.push(null);dNovo.push(nova_parc);}
+  for(let t=1;t<=showN;t++){labels.push('N'+t);dVenc.push(null);dCorr.push(null);dAvenc.push(null);dNovo.push(nova_parc);}
+  if(Nrep>30){labels.push('…');dVenc.push(null);dCorr.push(null);dAvenc.push(null);dNovo.push(nova_parc);}
 
   if(ch1){
-    ch1.data.labels=labels;ch1.data.datasets[0].data=dOrig;ch1.data.datasets[1].data=dAtraso;ch1.data.datasets[2].data=dNovo;ch1.update('none');
+    ch1.data.labels=labels;ch1.data.datasets[0].data=dVenc;ch1.data.datasets[1].data=dCorr;ch1.data.datasets[2].data=dAvenc;ch1.data.datasets[3].data=dNovo;ch1.update('none');
   } else {
-    ch1=new Chart(document.getElementById('c1'),{
-      type:'bar',
+    ch1=new Chart(document.getElementById('c1'),{type:'bar',
       data:{labels,datasets:[
-        {data:dOrig,backgroundColor:'#A32D2D',borderWidth:0,borderRadius:2},
-        {data:dAtraso,backgroundColor:'#888780',borderWidth:0,borderRadius:2},
-        {data:dNovo,backgroundColor:'#1D9E75',borderWidth:0,borderRadius:2}
+        {data:dVenc, backgroundColor:'#888780',borderWidth:0,borderRadius:0,stack:'orig'},
+        {data:dCorr, backgroundColor:'#378ADD',borderWidth:0,borderRadius:2,stack:'orig'},
+        {data:dAvenc,backgroundColor:'#5F5E5A',borderWidth:0,borderRadius:2,stack:'orig'},
+        {data:dNovo, backgroundColor:'#1D9E75',borderWidth:0,borderRadius:2,stack:'novo'}
       ]},
       options:{responsive:true,maintainAspectRatio:false,
         plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.raw!=null?brl(ctx.raw):null,title:ctx=>ctx[0].label}}},
         scales:{
-          x:{ticks:{font:{size:10},maxTicksLimit:24,autoSkip:true},grid:{display:false}},
-          y:{ticks:{font:{size:10},callback:v=>'R$'+Math.round(v/1000*10)/10+'k'},grid:{color:'rgba(0,0,0,.06)'}}
+          x:{stacked:true,ticks:{font:{size:10},maxTicksLimit:28,autoSkip:true},grid:{display:false}},
+          y:{stacked:false,ticks:{font:{size:10},callback:v=>'R$'+Math.round(v/1000*10)/10+'k'},grid:{color:'rgba(0,0,0,.06)'}}
         }
       }
     });
   }
 }
 
-['saldo','N_total','pagas','atraso','taxa_corr','perda_rec'].forEach(id=>document.getElementById(id).addEventListener('input',run));
+['saldo','vencidas','avencer','taxa_corr'].forEach(id=>document.getElementById(id).addEventListener('input',run));
 document.getElementById('fase').addEventListener('change',run);
-[
-  ['entrada','entrada-out',v=>'R$ '+Number(v).toLocaleString('pt-BR')],
-  ['Nrep','Nrep-out',v=>v+' parc.'],
-  ['desc_quit','desc-out',v=>(+v).toFixed(1).replace('.',',')+' %'],
+[['entrada','entrada-out',v=>'R$ '+Number(v).toLocaleString('pt-BR')],
+ ['Nrep','Nrep-out',v=>v+' parc.'],
+ ['desc_quit','desc-out',v=>(+v).toFixed(1).replace('.',',')+' %']
 ].forEach(([id,out,f])=>document.getElementById(id).addEventListener('input',e=>{document.getElementById(out).textContent=f(e.target.value);run();}));
 run();
 </script>
